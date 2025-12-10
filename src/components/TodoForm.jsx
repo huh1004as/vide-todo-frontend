@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './TodoForm.css';
 
 const TodoForm = ({ todo, onSubmit, onCancel }) => {
@@ -6,6 +6,22 @@ const TodoForm = ({ todo, onSubmit, onCancel }) => {
   const [description, setDescription] = useState(todo?.description || '');
   const [completed, setCompleted] = useState(todo?.completed || false);
   const [error, setError] = useState('');
+
+  // todo prop이 변경될 때마다 폼 필드를 업데이트
+  useEffect(() => {
+    if (todo) {
+      // 수정 모드: 선택된 할일의 데이터로 채우기
+      setTitle(todo.title || '');
+      setDescription(todo.description || '');
+      setCompleted(todo.completed || false);
+    } else {
+      // 새 할일 추가 모드: 폼 초기화
+      setTitle('');
+      setDescription('');
+      setCompleted(false);
+    }
+    setError('');
+  }, [todo]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -22,8 +38,8 @@ const TodoForm = ({ todo, onSubmit, onCancel }) => {
       completed,
     });
 
-    // 새 할일 추가인 경우 폼 초기화
-    if (!todo) {
+    // 수정 완료 후 폼 초기화
+    if (todo) {
       setTitle('');
       setDescription('');
       setCompleted(false);
