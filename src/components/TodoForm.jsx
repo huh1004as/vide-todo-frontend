@@ -38,12 +38,10 @@ const TodoForm = ({ todo, onSubmit, onCancel }) => {
       completed,
     });
 
-    // 수정 완료 후 폼 초기화
-    if (todo) {
-      setTitle('');
-      setDescription('');
-      setCompleted(false);
-    }
+    // 추가 또는 수정 완료 후 폼 초기화
+    setTitle('');
+    setDescription('');
+    setCompleted(false);
   };
 
   return (

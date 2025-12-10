@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import TodoForm from './components/TodoForm';
 import TodoList from './components/TodoList';
+import ConfirmModal from './components/ConfirmModal';
 import { getTodos, createTodo, updateTodo, deleteTodo } from './services/todoApi';
 import './App.css';
 
@@ -9,6 +10,7 @@ function App() {
   const [editingTodo, setEditingTodo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   // 할일 목록 불러오기
   const fetchTodos = async () => {
@@ -57,23 +59,33 @@ function App() {
     }
   };
 
-  // 할일 삭제
-  const handleDeleteTodo = async (id) => {
-    if (!window.confirm('정말 삭제하시겠습니까?')) {
-      return;
-    }
+  // 할일 삭제 확인 모달 열기
+  const handleDeleteClick = (id) => {
+    setDeleteConfirm(id);
+  };
+
+  // 할일 삭제 확인
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirm) return;
 
     try {
       setError('');
-      await deleteTodo(id);
-      setTodos(todos.filter(todo => todo._id !== id));
-      if (editingTodo && editingTodo._id === id) {
+      await deleteTodo(deleteConfirm);
+      setTodos(todos.filter(todo => todo._id !== deleteConfirm));
+      if (editingTodo && editingTodo._id === deleteConfirm) {
         setEditingTodo(null);
       }
+      setDeleteConfirm(null);
     } catch (err) {
       setError(err.message || '할일 삭제에 실패했습니다.');
       console.error(err);
+      setDeleteConfirm(null);
     }
+  };
+
+  // 할일 삭제 취소
+  const handleCancelDelete = () => {
+    setDeleteConfirm(null);
   };
 
   // 할일 완료 상태 토글
@@ -155,13 +167,20 @@ function App() {
               <TodoList
                 todos={todos}
                 onEdit={handleEdit}
-                onDelete={handleDeleteTodo}
+                onDelete={handleDeleteClick}
                 onToggleComplete={handleToggleComplete}
               />
             )}
           </div>
         </div>
       </div>
+      {deleteConfirm && (
+        <ConfirmModal
+          message="정말 삭제하시겠습니까?"
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+        />
+      )}
     </div>
   );
 }
